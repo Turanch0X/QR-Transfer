@@ -1,6 +1,7 @@
 import qrcode, tkinter, io, win32clipboard
 from tkinter import filedialog
 from PIL import ImageTk
+from urllib.parse import urlparse
 
 window = tkinter.Tk()
 window_size = (520,550)
@@ -11,7 +12,7 @@ enter_hint = "Paste URL here:"
 window.geometry(f'{window_size[0]}x{window_size[1]}+750+100')
 window.title("QR-Transfer")
 window.config(background='grey')
-window.iconbitmap("QR_transfer_git\\logo.ico")
+window.iconbitmap("logo.ico")
 
 canvas_up = tkinter.Canvas(window, bg='white', width=window_size[0], height=60)
 canvas_up.pack()
@@ -37,8 +38,12 @@ def input_delete():
     else:
         entry.delete(0, tkinter.END)
 
+def is_valid_url(url):
+    parse = urlparse(url)
+    return bool(parse.scheme) and bool(parse.netloc) 
+
 def transfer_url_to_image():
-    if not entry.get() or 'https' not in entry.get():
+    if not is_valid_url(entry.get().strip()):
         tkinter.messagebox.showwarning("Input Error.", "Please enter correct URL.")
         return
     else:
@@ -68,9 +73,6 @@ def copy_image(qr_image_obj):
     output = io.BytesIO()
     qr_image_obj.save(output, format="BMP")
     data = output.getvalue()[14:]  # Skip BMP header
-
-    # print("Full BMP heading: ", data[:14].hex())# - for video
-
     output.close()
     
     win32clipboard.OpenClipboard()
@@ -88,12 +90,11 @@ run_btn = tkinter.Button(window, text="Run", bg='orange', font=text_font, border
 delete_btn = tkinter.Button(window, text="Delete", bg='orange', font=text_font, border=5, relief='ridge', command=input_delete)
 
 image_labl = tkinter.Label(canvas_down, bg='grey', justify='center', border=5, relief='ridge')
-save_btn = tkinter.Button(canvas_down, text="Save", bg='orange', border=5, relief='ridge', font=text_font)
+save_btn = tkinter.Button(canvas_down, text="Save", bg='orange', border=5, relief='ridge', font=text_font, command=lambda: save_image(image_labl))
 copy_btn = tkinter.Button(canvas_down, text="Copy", bg='orange', border=5, relief='ridge', font=text_font)
 
 entry.bind('<FocusIn>', show_hint)
 entry.bind('<FocusOut>', hide_hint)
-save_btn.config(command=lambda: save_image(image_labl))
 
 canvas_up.create_window(180, 30, window=entry)
 canvas_up.create_window(480, 30, window=delete_btn)
