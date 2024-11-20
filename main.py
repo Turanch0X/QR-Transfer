@@ -11,7 +11,7 @@ enter_hint = "Paste URL here:"
 window.geometry(f'{window_size[0]}x{window_size[1]}+750+100')
 window.title("QR-Transfer")
 window.config(background='grey')
-window.iconbitmap("logo.ico")
+window.iconbitmap("QR_transfer_git\\logo.ico")
 
 canvas_up = tkinter.Canvas(window, bg='white', width=window_size[0], height=60)
 canvas_up.pack()
@@ -68,6 +68,9 @@ def copy_image(qr_image_obj):
     output = io.BytesIO()
     qr_image_obj.save(output, format="BMP")
     data = output.getvalue()[14:]  # Skip BMP header
+
+    # print("Full BMP heading: ", data[:14].hex())# - for video
+
     output.close()
     
     win32clipboard.OpenClipboard()
